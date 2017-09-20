@@ -4,7 +4,7 @@ import requests
 from time import sleep
 
 
-def get_wikipedia_path_to_philosophy(starting_url, max_links=20):
+def crawl_wikipedia_path_to_philosophy(starting_url, max_links=20):
     """
     Get the path to the Philosophy wiki page following the first link in the main
     body of the given url.
@@ -113,27 +113,27 @@ def strip_out_parenthesis(text):
         return text
 
 
-### MAIN
+if __name__ == '__main__':
 
-# Test 1: End state: Finds Philosophy
-# Tests:
-#   1. Skipping links in parenthesis that we don't want to follow (on page: Sport)
-#   2. Not skipping links that have parenthesis in them (on page: Objectivity (philosophy))
-#
-# starting_url = 'https://en.wikipedia.org/wiki/Sport'
-# articles = get_wikipedia_path_to_philosophy(starting_url)
+    # Test 1: End state: Finds Philosophy
+    # Tests:
+    #   1. Skipping links in parenthesis that we don't want to follow (on page: Sport)
+    #   2. Not skipping links that have parenthesis in them (on page: Objectivity (philosophy))
+    #
+    # url = 'https://en.wikipedia.org/wiki/Sport'
+    # get_wikipedia_path_to_philosophy(url)
 
-# Test 2: End state: Infinite loop (Mathematics->Quantity->Counting->Finite_set->Mathematics)
-#
-# starting_url = 'https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol'
-# articles = get_wikipedia_path_to_philosophy(starting_url)
+    # Test 2: End state: Infinite loop (Mathematics->Quantity->Counting->Finite_set->Mathematics)
+    #
+    # url = 'https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol'
+    # get_wikipedia_path_to_philosophy(url)
 
-# Test 3: End state: Reaches max count
-# Tests:
-#   1. Only follow /wiki/* hyperlinks (on page: Potentate)
-#
-# starting_url = 'https://en.wikipedia.org/wiki/Throne'
-# articles = get_wikipedia_path_to_philosophy(starting_url, 10)
+    # Test 3: End state: Reaches max count
+    # Tests:
+    #   1. Only follow /wiki/* hyperlinks (on page: Potentate)
+    #
+    # url = 'https://en.wikipedia.org/wiki/Throne'
+    # get_wikipedia_path_to_philosophy(url, 10)
 
-starting_url = 'https://en.wikipedia.org/wiki/Special:Random'
-articles = get_wikipedia_path_to_philosophy(starting_url)
+    url = 'https://en.wikipedia.org/wiki/Special:Random'
+    crawl_wikipedia_path_to_philosophy(url)
