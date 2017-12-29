@@ -2,7 +2,7 @@ from wikicrawler import crawl_wikipedia_path_to_philosophy, SEARCH_DONE_FOUND_PH
     SEARCH_DONE_MAX_COUNT
 
 
-def test_sport_finds_philosophy():
+def test_crawl_finds_philosophy():
     # Test Description: End state: Finds Philosophy
 
     url = 'https://en.wikipedia.org/wiki/Ethology'
@@ -12,7 +12,7 @@ def test_sport_finds_philosophy():
     assert result_string == SEARCH_DONE_FOUND_PHILOSOPHY
 
 
-def test_mathematics_infinite_loop():
+def test_crawl_infinite_loop():
     # Test Description: End state: Infinite loop (Mathematics->Quantity->Counting->Finite_set->Mathematics)
 
     url = 'https://en.wikipedia.org/wiki/Mathematics'
@@ -22,7 +22,7 @@ def test_mathematics_infinite_loop():
     assert result_string == SEARCH_DONE_INFINITE_LOOP
 
 
-def test_throne_max_out():
+def test_crawl_max_out():
     # Test Description: End state: Reaches max count
 
     max_pages = 3
