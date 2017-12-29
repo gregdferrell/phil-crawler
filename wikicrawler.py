@@ -3,6 +3,16 @@ import re
 import requests
 from time import sleep
 
+SEARCH_DONE_STUCK = 'I traveled a great distance, but ran into a dead end from which I cannot return'
+
+SEARCH_DONE_INFINITE_LOOP = 'I traveled a great distance, only to find myself in an infinite loop'
+
+SEARCH_DONE_FOUND_PHILOSOPHY = 'I traveled a great distance, and found philosophy'
+
+SEARCH_DONE_MAX_COUNT = 'I traveled a great distance, then got really tired and quit'
+
+CONTINUE_SEARCH = 'Continue search'
+
 
 def crawl_wikipedia_path_to_philosophy(starting_url, max_links=20):
     """
@@ -10,13 +20,16 @@ def crawl_wikipedia_path_to_philosophy(starting_url, max_links=20):
     body of the given url.
     :param starting_url: the starting wikipedia page
     :param max_links: the maximum number of links to search
-    :return: a list of URL strings from the first page to the last
+    :return: a tuple containing (0) a list of URL strings from the first page to the last and (1) a search result string
     """
 
     articles_visited = []
     get_url = starting_url
 
-    while continue_with_search(articles_visited, get_url, max_links):
+    result = True
+    while result:
+        print('Step ' + str(len(articles_visited) + 1) + ': ' + get_url)
+
         response = requests.get(get_url)
         html = response.text
         soup = BeautifulSoup(html, 'html.parser')
@@ -27,34 +40,42 @@ def crawl_wikipedia_path_to_philosophy(starting_url, max_links=20):
         # Find next url
         get_url = extract_next_wiki_link(soup)
 
-        # Don't want to hit wikipedia server too hard
-        sleep(1)
+        # Determine whether or not to continue
+        result, result_description = continue_with_search(articles_visited, get_url, max_links)
+
+        # If we are continuing, sleep so we don't hit the wikipedia server too hard
+        if result:
+            sleep(1)
+
+    return articles_visited, result_description
 
 
-def continue_with_search(articles_visited, get_url, max_links):
+def continue_with_search(articles_visited, next_url, max_links):
+    '''
+    Determines whether or not to continue with the search.
+    :param articles_visited: the list of articles visited until now
+    :param next_url: the next url to visit
+    :param max_links: the max number of pages allowed to visit
+    :return: a tuple containing (0) a boolean indicating whether or not to continue the search and (1) a reason
+    '''
+
     # Check if reached max count
     if len(articles_visited) == max_links:
-        print('I traveled a great distance, then got really tired and quit')
-        return False
-
-    print('Step ' + str(len(articles_visited) + 1) + ': ' + get_url)
+        return False, SEARCH_DONE_MAX_COUNT
 
     # Check for philosophy page
-    if get_url == 'https://en.wikipedia.org/wiki/Philosophy':
-        print('I traveled a great distance, and found philosophy')
-        return False
+    if articles_visited[-1] == 'https://en.wikipedia.org/wiki/Philosophy':
+        return False, SEARCH_DONE_FOUND_PHILOSOPHY
 
     # Check if page has already been encountered
-    if get_url in articles_visited[:-1]:
-        print('I traveled a great distance, only to find myself in an infinite loop')
-        return False
+    if articles_visited[-1] in articles_visited[:-1]:
+        return False, SEARCH_DONE_INFINITE_LOOP
 
     # Check if the page has no valid link
-    if not get_url:
-        print('I traveled a great distance, but ran into a dead end from which I cannot return')
-        return False
+    if not next_url:
+        return False, SEARCH_DONE_STUCK
 
-    return True
+    return True, CONTINUE_SEARCH
 
 
 def extract_next_wiki_link(soup):
@@ -114,26 +135,5 @@ def strip_out_parenthesis(text):
 
 
 if __name__ == '__main__':
-
-    # Test 1: End state: Finds Philosophy
-    # Tests:
-    #   1. Skipping links in parenthesis that we don't want to follow (on page: Sport)
-    #   2. Not skipping links that have parenthesis in them (on page: Objectivity (philosophy))
-    #
-    # url = 'https://en.wikipedia.org/wiki/Sport'
-    # get_wikipedia_path_to_philosophy(url)
-
-    # Test 2: End state: Infinite loop (Mathematics->Quantity->Counting->Finite_set->Mathematics)
-    #
-    # url = 'https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol'
-    # get_wikipedia_path_to_philosophy(url)
-
-    # Test 3: End state: Reaches max count
-    # Tests:
-    #   1. Only follow /wiki/* hyperlinks (on page: Potentate)
-    #
-    # url = 'https://en.wikipedia.org/wiki/Throne'
-    # get_wikipedia_path_to_philosophy(url, 10)
-
     url = 'https://en.wikipedia.org/wiki/Special:Random'
-    crawl_wikipedia_path_to_philosophy(url)
+    print(crawl_wikipedia_path_to_philosophy(url))
