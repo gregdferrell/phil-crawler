@@ -41,9 +41,11 @@ def crawl_wikipedia_path_to_philosophy(starting_url, max_links=20):
         get_url = extract_next_wiki_link(soup)
 
         # Determine whether or not to continue
-        result, result_description = continue_with_search(articles_visited, get_url, max_links)
+        result, result_description = continue_with_search(articles_visited,
+                                                          get_url, max_links)
 
-        # If we are continuing, sleep so we don't hit the wikipedia server too hard
+        # If we are continuing, sleep so we don't hit the wikipedia server
+        # too hard
         if result:
             sleep(1)
 
@@ -86,7 +88,8 @@ def extract_next_wiki_link(soup):
     :return: a string representing an href to the next wikipedia page or null if none found
     """
 
-    p_tags = soup.find(id='mw-content-text').find(class_='mw-parser-output').find_all('p', recursive=False)
+    p_tags = soup.find(id='mw-content-text').find(
+        class_='mw-parser-output').find_all('p', recursive=False)
     for p in p_tags:
         p_stripped_str = strip_out_parenthesis(str(p))
         p_sub = BeautifulSoup(p_stripped_str, 'html.parser')
